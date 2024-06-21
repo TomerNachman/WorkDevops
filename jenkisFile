@@ -1,63 +1,70 @@
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'user_input', defaultValue: '0', description: 'A numeric parameter')
-    }
-
-    environment {
-        OUTPUT_FILE = 'output.html'
-    }
-
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/TomerNachman/WorkDevops'  // Replace with your repository URL
+                // שלב לשכפול קוד המקור מ-Git
+                git url: 'https://example.com/your-repo.git', branch: 'main'
             }
         }
 
-        stage('Run Shell Script') {
+        stage('Get Input') {
             steps {
                 script {
-                    def output = sh(script: "bash script.sh ${params.user_input}", returnStdout: true).trim()
-                    writeFile file: OUTPUT_FILE, text: "<html><body><h1>Output</h1><p>${output}</p></body></html>"
+                    // בקש מהמשתמש להזין מחרוזת לבדיקה
+                    inputString = input message: 'הזן מחרוזת לבדיקה:', parameters: [string(defaultValue: '', description: 'מחרוזת', name: 'inputString')]
                 }
             }
         }
 
-        stage('Display Parameter') {
+        stage('Check Palindrome') {
             steps {
                 script {
-                    currentBuild.description = "Numeric parameter is ${params.user_input}"
-                }
-            }
-        }
+                    // הסרת רווחים ולבבות מהמחרוזת המקורית והיפוך שלה
+                    cleanedInput = inputString.replaceAll("\\s", "")
+                    reversedInput = cleanedInput.reverse()
 
-        stage('Verify Parameter on Web Page') {
-            steps {
-                script {
-                    def description = currentBuild.description
-                    if (description.contains("${params.user_input}")) {
-                        echo "Parameter ${params.user_input} exists on the web page."
+                    // בדיקת פלינדרום
+                    if (cleanedInput == reversedInput) {
+                        result = "כן, זה פלינדרום"
                     } else {
-                        error "Parameter ${params.user_input} does not exist on the web page."
+                        result = "לא, זה לא פלינדרום"
                     }
+
+                    // יצירת דוח HTML
+                    writeFile file: 'result.html', text: """
+                        <html>
+                        <head>
+                            <title>תוצאת בדיקת פלינדרום</title>
+                        </head>
+                        <body>
+                            <h1>${result}</h1>
+                        </body>
+                        </html>
+                    """
                 }
+            }
+        }
+
+        stage('Publish HTML Report') {
+            steps {
+                publishHTML (target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: '.',
+                    reportFiles: 'result.html',
+                    reportName: 'תוצאת בדיקת פלינדרום'
+                ])
             }
         }
     }
 
     post {
         always {
-            archiveArtifacts artifacts: OUTPUT_FILE, fingerprint: true
-            publishHTML(target: [
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: '.',
-                reportFiles: OUTPUT_FILE,
-                reportName: 'Shell Script Output'
-            ])
+            // ניקוי לאחר הרצה
+            cleanWs()
         }
     }
 }
