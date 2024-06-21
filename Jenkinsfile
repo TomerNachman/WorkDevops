@@ -5,7 +5,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 // שלב לשכפול קוד המקור מ-Git
-                git url: 'https://github.com/TomerNachman/WorkDevops.git', branch: 'master'
+                git url: 'https://github.com/TomerNachman/WorkDevops.git', branch: 'main'
             }
         }
 
