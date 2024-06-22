@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     // בקש מהמשתמש להזין מחרוזת לבדיקה
-                    inputString = input message: 'הזן מחרוזת לבדיקה:', parameters: [string(defaultValue: '', description: 'מחרוזת', name: 'inputString')]
+                    env.inputString = input message: 'הזן מחרוזת לבדיקה:', parameters: [string(defaultValue: '', description: 'מחרוזת', name: 'inputString')]
                 }
             }
         }
@@ -22,10 +22,11 @@ pipeline {
             steps {
                 script {
                     // הסרת רווחים ולבבות מהמחרוזת המקורית והיפוך שלה
-                    cleanedInput = inputString.replaceAll("\\s", "")
-                    reversedInput = cleanedInput.reverse()
+                    def cleanedInput = env.inputString.replaceAll("\\s", "")
+                    def reversedInput = cleanedInput.reverse()
 
                     // בדיקת פלינדרום
+                    def result
                     if (cleanedInput == reversedInput) {
                         result = "כן, זה פלינדרום"
                     } else {
