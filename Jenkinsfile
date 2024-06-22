@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     // בקש מהמשתמש להזין מחרוזת לבדיקה
-                    inputString = input message: 'הזן מחרוזת לבדיקה:', parameters: [string(defaultValue: '', description: 'מחרוזת', name: 'inputString')]
+                    env.inputString = input message: 'הזן מחרוזת לבדיקה:', parameters: [string(defaultValue: '', description: 'מחרוזת', name: 'inputString')]
                 }
             }
         }
@@ -21,11 +21,12 @@ pipeline {
         stage('Check Palindrome') {
             steps {
                 script {
-                    // הסרת רווחים ולבבות מהמחרוזת המקורית והיפוך שלה
-                    cleanedInput = inputString.replaceAll("\\s", "")
-                    reversedInput = cleanedInput.reverse()
+                    // הסרת רווחים מהמחרוזת המקורית והיפוך שלה
+                    def cleanedInput = env.inputString.replaceAll("\\s", "")
+                    def reversedInput = cleanedInput.reverse()
 
                     // בדיקת פלינדרום
+                    def result
                     if (cleanedInput == reversedInput) {
                         result = "כן, זה פלינדרום"
                     } else {
@@ -49,7 +50,7 @@ pipeline {
 
         stage('Publish HTML Report') {
             steps {
-                publishHTML (target: [
+                publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
@@ -68,6 +69,7 @@ pipeline {
         }
     }
 }
+
 
             ])
         }
