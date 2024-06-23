@@ -16,12 +16,13 @@ pipeline {
 
         stage('Get Input') {
             steps {
-                input message: 'Input requested', ok: 'Approved by tomer'
+                input message: 'Input requested', submitter: 'Approved by tomer or Abort'
             }
         }
 
         stage('Check Palindrome') {
             steps {
+                sh 'chmod +x ./script.sh' // Grant execute permission to script.sh
                 sh './script.sh'
             }
         }
@@ -40,4 +41,3 @@ pipeline {
         }
     }
 }
-
