@@ -2,42 +2,71 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                git 'https://github.com/TomerNachman/WorkDevops.git'
+                // שלב לשכפול קוד המקור מ-Git
+                git url: 'https://github.com/TomerNachman/WorkDevops.git', branch: 'master'
             }
         }
 
-        stage('Palindrome Check') {
+        stage('Get Input') {
             steps {
                 script {
-                    def inputString = 'madam' // Replace with your input or use parameter
-                    def result = sh(script: "python3 palindrome_check.py ${inputString}", returnStdout: true).trim()
-                    echo "Palindrome Check Result: ${result}"
-                    env.PALINDROME_RESULT = result
+                    // בקש מהמשתמש להזין מחרוזת לבדיקה
+                    env.inputString = input message: 'הזן מחרוזת לבדיקה:', parameters: [string(defaultValue: '', description: 'מחרוזת', name: 'inputString')]
                 }
             }
         }
 
-        stage('Display Result') {
+        stage('Check Palindrome') {
             steps {
                 script {
-                    def result = env.PALINDROME_RESULT ?: 'No result available'
-                    writeFile file: 'result.txt', text: result
-                    archiveArtifacts artifacts: 'result.txt', allowEmptyArchive: true
+                    // הסרת רווחים מהמחרוזת המקורית והיפוך שלה
+                    def cleanedInput = env.inputString.replaceAll("\\s", "")
+                    def reversedInput = cleanedInput.reverse()
+
+                    // בדיקת פלינדרום
+                    def result
+                    if (cleanedInput == reversedInput) {
+                        result = "כן, זה פלינדרום"
+                    } else {
+                        result = "לא, זה לא פלינדרום"
+                    }
+
+                    // יצירת דוח HTML
+                    writeFile file: 'result.html', text: """
+                        <html>
+                        <head>
+                            <title>תוצאת בדיקת פלינדרום</title>
+                        </head>
+                        <body>
+                            <h1>${result}</h1>
+                        </body>
+                        </html>
+                    """
                 }
+            }
+        }
+
+        stage('Publish HTML Report') {
+            steps {
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: '.',
+                    reportFiles: 'result.html',
+                    reportName: 'תוצאת בדיקת פלינדרום'
+                ])
             }
         }
     }
 
     post {
         always {
+            // ניקוי לאחר הרצה
             cleanWs()
         }
     }
 }
 
-    }
-}
-
-}
