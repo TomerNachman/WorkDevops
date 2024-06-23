@@ -4,11 +4,10 @@
 git clone https://github.com/TomerNachman/WorkDevops.git
 cd WorkDevops
 
-# Get input from the user
-read -p "הזן מחרוזת לבדיקה: " inputString
+#!/bin/bash
 
 # Remove spaces from the input string and reverse it
-cleanedInput=$(echo "$inputString" | tr -d '[:space:]')
+cleanedInput=$(echo "$1" | tr -d '[:space:]')
 reversedInput=$(echo "$cleanedInput" | rev)
 
 # Check if the input string is a palindrome
@@ -17,6 +16,10 @@ if [ "$cleanedInput" = "$reversedInput" ]; then
 else
     result="לא, זה לא פלינדרום"
 fi
+
+# Print the result
+echo "$result"
+
 
 # Create HTML report with CSS styling
 htmlContent=$(cat <<EOF
