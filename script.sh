@@ -1,19 +1,11 @@
-
 #!/bin/bash
 
-input="sus"  # Replace with actual input or dynamic input from Jenkins
+input="sus"  # Replace with your actual input or parameterized input
+cleanedInput=$(echo $input | tr -d '[:space:]')
+reversedInput=$(echo $cleanedInput | rev)
 
-# Remove spaces if any
-cleanedInput=$(echo "$input" | tr -d [:space:])
-
-# Reverse the input
-reversedInput=$(echo "$cleanedInput" | rev)
-
-# Check if the original and reversed inputs are the same
-if [ "$cleanedInput" = "$reversedInput" ]; then
-    result="כן, זה פלינדרום"
+if [ "$cleanedInput" == "$reversedInput" ]; then
+    echo "Yes, it's a palindrome"
 else
-    result="לא, זה לא פלינדרום"
+    echo "No, it's not a palindrome"
 fi
-
-echo "$result"
