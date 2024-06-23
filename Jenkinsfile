@@ -20,64 +20,57 @@ pipeline {
 
         stage('Check Palindrome') {
             steps {
-                script {
-                  #!/bin/bash
+                // הרצת הסקריפט ב-Bash
+                sh '''
+                # הסרת רווחים מהמחרוזת המקורית והיפוך שלה
+                cleanedInput=$(echo "$inputString" | tr -d '[:space:]')
+                reversedInput=$(echo "$cleanedInput" | rev)
 
-# בקש מהמשתמש להזין מחרוזת לבדיקה
-read -p "הזן מחרוזת לבדיקה: " inputString
+                # בדיקת פלינדרום
+                if [ "$cleanedInput" == "$reversedInput" ]; then
+                    result="כן, זה פלינדרום"
+                else
+                    result="לא, זה לא פלינדרום"
+                fi
 
-# הסרת רווחים מהמחרוזת המקורית והיפוך שלה
-cleanedInput=$(echo "$inputString" | tr -d '[:space:]')
-reversedInput=$(echo "$cleanedInput" | rev)
+                # יצירת דוח HTML עם עיצוב CSS
+                htmlContent=$(cat <<EOF
+                <html>
+                <head>
+                    <title>תוצאת בדיקת פלינדרום</title>
+                    <style>
+                        body {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            margin: 0;
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f4;
+                        }
+                        .container {
+                            text-align: center;
+                            background: white;
+                            padding: 2em;
+                            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        }
+                        h1 {
+                            color: #333;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>$result</h1>
+                    </div>
+                </body>
+                </html>
+                EOF
+                )
 
-# בדיקת פלינדרום
-if [ "$cleanedInput" == "$reversedInput" ]; then
-    result="כן, זה פלינדרום"
-else
-    result="לא, זה לא פלינדרום"
-fi
-
-# יצירת דוח HTML עם עיצוב CSS
-htmlContent=$(cat <<EOF
-<html>
-<head>
-    <title>תוצאת בדיקת פלינדרום</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
-        .container {
-            text-align: center;
-            background: white;
-            padding: 2em;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>$result</h1>
-    </div>
-</body>
-</html>
-EOF
-)
-
-# כתיבת הדוח לקובץ
-echo "$htmlContent" > result.html
-
-echo "הדוח נוצר בקובץ result.html"
-
-                }
+                # כתיבת הדוח לקובץ
+                echo "$htmlContent" > result.html
+                '''
             }
         }
 
@@ -102,3 +95,4 @@ echo "הדוח נוצר בקובץ result.html"
         }
     }
 }
+
