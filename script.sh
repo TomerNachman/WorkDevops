@@ -1,6 +1,6 @@
 #!/bin/bash
 
-input="sus"  # Replace with your actual input or parameterized input
+input="sus"  
 cleanedInput=$(echo $input | tr -d '[:space:]')
 reversedInput=$(echo $cleanedInput | rev)
 
