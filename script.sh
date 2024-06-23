@@ -1,25 +1,57 @@
 #!/bin/bash
 
-while true; do
-    # בקש מהמשתמש להזין מחרוזת לבדיקה
-    input=$(zenity --entry --title="בדיקת פלינדרום" --text="הזן מחרוזת לבדיקה (או -1 לסיום):")
+#!/bin/bash
 
-    # בדוק אם המשתמש הכניס -1 או לחץ ביטול
-    if [ "$input" = "-1" ] || [ -z "$input" ]; then
-        zenity --info --title="סיום" --text="הסקריפט הסתיים."
-        exit 0
-    fi
+# בקש מהמשתמש להזין מחרוזת לבדיקה
+read -p "הזן מחרוזת לבדיקה: " inputString
 
-    # הסר רווחים ולבבות מהמחרוזת המקורית והפוך אותה
-    cleaned_input=$(echo "$input" | tr -d '[:space:]')
-    reversed_input=$(echo "$cleaned_input" | rev)
+# הסרת רווחים מהמחרוזת המקורית והיפוך שלה
+cleanedInput=$(echo "$inputString" | tr -d '[:space:]')
+reversedInput=$(echo "$cleanedInput" | rev)
 
-    # בדוק אם המחרוזת ההפוכה שווה למחרוזת המקורית
-    if [ "$cleaned_input" = "$reversed_input" ]; then
-        zenity --info --title="תוצאה" --text="כן, זה פלינדרום"
-    else
-        zenity --info --title="תוצאה" --text="לא, זה לא פלינדרום"
-    fi
-done
-
+# בדיקת פלינדרום
+if [ "$cleanedInput" == "$reversedInput" ]; then
+    result="כן, זה פלינדרום"
+else
+    result="לא, זה לא פלינדרום"
 fi
+
+# יצירת דוח HTML עם עיצוב CSS
+htmlContent=$(cat <<EOF
+<html>
+<head>
+    <title>תוצאת בדיקת פלינדרום</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2em;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>$result</h1>
+    </div>
+</body>
+</html>
+EOF
+)
+
+# כתיבת הדוח לקובץ
+echo "$htmlContent" > result.html
+
+echo "הדוח נוצר בקובץ result.html"
