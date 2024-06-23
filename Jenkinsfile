@@ -22,15 +22,18 @@ pipeline {
 
         stage('Check Palindrome') {
             steps {
-                sh 'chmod +x ./script.sh' // Grant execute permission to script.sh
-                sh './script.sh'
+                sh 'chmod +x ./script.sh' // Ensure execute permission for script.sh
+                script {
+                    def scriptOutput = sh(returnStdout: true, script: './script.sh').trim()
+                    env.RESULT = scriptOutput // Store result in environment variable
+                }
             }
         }
 
         stage('Publish HTML Report') {
             steps {
                 script {
-                    // Write content for HTML report
+                    def result = env.RESULT ?: 'No result available'  // Retrieve result from environment variable
                     def content = """
                     <html>
                     <head><title>Palindrome Check</title></head>
@@ -40,7 +43,6 @@ pipeline {
                     </body>
                     </html>
                     """
-                    
                     writeFile file: 'index.html', text: content
                 }
 
@@ -60,5 +62,8 @@ pipeline {
         always {
             cleanWs()
         }
+    }
+}
+
     }
 }
