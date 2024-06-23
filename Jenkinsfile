@@ -22,8 +22,8 @@ pipeline {
 
         stage('Check Palindrome') {
             steps {
-                sh 'chmod +x ./script.sh' // Ensure execute permission for script.sh
                 script {
+                    sh 'chmod +x ./script.sh' // Ensure execute permission for script.sh
                     def scriptOutput = sh(returnStdout: true, script: './script.sh').trim()
                     env.RESULT = scriptOutput // Store result in environment variable
                 }
