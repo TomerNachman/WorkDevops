@@ -27,7 +27,7 @@ pipeline {
                 reversedInput=$(echo "$cleanedInput" | rev)
 
                 # בדיקת פלינדרום
-                if [[ "$cleanedInput" == "$reversedInput" ]]; then
+                if [ "$cleanedInput" = "$reversedInput" ]; then
                     result="כן, זה פלינדרום"
                 else
                     result="לא, זה לא פלינדרום"
@@ -95,3 +95,4 @@ pipeline {
         }
     }
 }
+
