@@ -1,22 +1,24 @@
 #!/bin/bash
 
-#!/bin/bash
+# Clone the Git repository
+git clone https://github.com/TomerNachman/WorkDevops.git
+cd WorkDevops
 
-# בקש מהמשתמש להזין מחרוזת לבדיקה
+# Get input from the user
 read -p "הזן מחרוזת לבדיקה: " inputString
 
-# הסרת רווחים מהמחרוזת המקורית והיפוך שלה
+# Remove spaces from the input string and reverse it
 cleanedInput=$(echo "$inputString" | tr -d '[:space:]')
 reversedInput=$(echo "$cleanedInput" | rev)
 
-# בדיקת פלינדרום
-if [ "$cleanedInput" == "$reversedInput" ]; then
+# Check if the input string is a palindrome
+if [ "$cleanedInput" = "$reversedInput" ]; then
     result="כן, זה פלינדרום"
 else
     result="לא, זה לא פלינדרום"
 fi
 
-# יצירת דוח HTML עם עיצוב CSS
+# Create HTML report with CSS styling
 htmlContent=$(cat <<EOF
 <html>
 <head>
@@ -51,7 +53,8 @@ htmlContent=$(cat <<EOF
 EOF
 )
 
-# כתיבת הדוח לקובץ
+# Write the HTML content to a file
 echo "$htmlContent" > result.html
 
-echo "הדוח נוצר בקובץ result.html"
+# Display the HTML file using the default web browser
+xdg-open result.html
