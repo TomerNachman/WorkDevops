@@ -50,3 +50,4 @@ html_content="
 # Output the HTML content to a file
 output_file="palindrome_result.html"
 echo "$html_content" > "$output_file"
+
