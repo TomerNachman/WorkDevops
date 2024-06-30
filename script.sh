@@ -14,23 +14,6 @@ is_palindrome() {
 # Input string from the command line argument
 input_string="$1"
 
-# Validate input: must be a string, not purely numeric
-if [[ -z "$input_string" ]]; then
-    echo "Error: No input provided. Please enter a string." >&2
-    exit 1
-fi
-
-if [[ "$input_string" =~ ^[0-9]+$ ]]; then
-    echo "Error: Numeric input detected. Please enter a string." >&2
-    exit 1
-fi
-
-# Check if the string is a palindrome
-result=$(is_palindrome "$input_string")
-
-# Output the result to the console
-echo "$result"
-
 # Generate HTML content
 html_content="
 <!DOCTYPE html>
@@ -42,13 +25,24 @@ html_content="
 </head>
 <body>
     <h1>Palindrome Check Result</h1>
-    <p>$result</p>
-</body>
-</html>
 "
+
+# Validate input: must be a string, not purely numeric
+if [[ -z "$input_string" ]]; then
+    result="Error: No input provided. Please enter a string."
+elif [[ "$input_string" =~ ^[0-9]+$ ]]; then
+    result="Error: Numeric input detected. Please enter a string."
+else
+    # Check if the string is a palindrome
+    result=$(is_palindrome "$input_string")
+fi
+
+# Output the result to the console
+echo "$result"
+
+# Append result to HTML content
+html_content+="<p>$result</p></body></html>"
 
 # Output the HTML content to a file
 output_file="palindrome_result.html"
 echo "$html_content" > "$output_file"
-
-
