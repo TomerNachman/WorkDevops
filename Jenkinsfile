@@ -1,46 +1,39 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'user_input', defaultValue: 'madam', description: 'Enter a string to check if it is a palindrome')
+    }
+
+    environment {
+        OUTPUT_FILE = 'palindrome_result.html'
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
-                // שלב לשכפול קוד המקור מ-Git
-                git url: 'https://github.com/TomerNachman/WorkDevops.git', branch: 'master'
+                git 'https://github.com/osll1/Linux.git'  
             }
         }
 
-        stage('Get Input') {
+        stage('Run Shell Script') {
             steps {
                 script {
-                    // בקש מהמשתמש להזין מחרוזת לבדיקה
-                    env.inputString = input message: 'הזן מחרוזת לבדיקה:', parameters: [string(defaultValue: '', description: 'מחרוזת', name: 'inputString')]
-                }
-            }
-        }
+                    def output = sh(script: "bash script.sh '${params.user_input}'", returnStdout: true).trim()
+                    echo output // This line outputs the result to the Jenkins console
 
-        stage('Check Palindrome') {
-            steps {
-                script {
-                    // הסרת רווחים מהמחרוזת המקורית והיפוך שלה
-                    def cleanedInput = env.inputString.replaceAll("\\s", "")
-                    def reversedInput = cleanedInput.reverse()
-
-                    // בדיקת פלינדרום
-                    def result
-                    if (cleanedInput == reversedInput) {
-                        result = "כן, זה פלינדרום"
-                    } else {
-                        result = "לא, זה לא פלינדרום"
-                    }
-
-                    // יצירת דוח HTML
-                    writeFile file: 'result.html', text: """
-                        <html>
+                    // Write the HTML file content
+                    writeFile file: OUTPUT_FILE, text: """
+                        <!DOCTYPE html>
+                        <html lang='en'>
                         <head>
-                            <title>תוצאת בדיקת פלינדרום</title>
+                            <meta charset='UTF-8'>
+                            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                            <title>Palindrome Check Result</title>
                         </head>
                         <body>
-                            <h1>${result}</h1>
+                            <h1>Palindrome Check Result</h1>
+                            <p>${output}</p>
                         </body>
                         </html>
                     """
@@ -48,24 +41,39 @@ pipeline {
             }
         }
 
-        stage('Publish HTML Report') {
+        stage('Display Parameter') {
             steps {
-                publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: '.',
-                    reportFiles: 'result.html',
-                    reportName: 'תוצאת בדיקת פלינדרום'
-                ])
+                script {
+                    currentBuild.description = "String parameter is '${params.user_input}'"
+                }
+            }
+        }
+
+        stage('Verify Parameter on Web Page') {
+            steps {
+                script {
+                    def description = currentBuild.description
+                    if (description.contains("${params.user_input}")) {
+                        echo "Parameter '${params.user_input}' exists on the web page."
+                    } else {
+                        error "Parameter '${params.user_input}' does not exist on the web page."
+                    }
+                }
             }
         }
     }
 
     post {
         always {
-            // ניקוי לאחר הרצה
-            cleanWs()
+            archiveArtifacts artifacts: OUTPUT_FILE, fingerprint: true
+            publishHTML(target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: OUTPUT_FILE,
+                reportName: 'Palindrome Check Result'
+            ])
         }
     }
 }
