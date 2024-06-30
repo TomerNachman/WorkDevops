@@ -19,11 +19,47 @@ pipeline {
         stage('Run Shell Script') {
             steps {
                 script {
-                    def output = sh(script: "bash script.sh '${params.user_input}'", returnStdout: true).trim()
+                    def output = sh(script: """
+                        #!/bin/bash
+
+                        input_string="${params.user_input}"
+
+                        # Validate input: must be a string, not purely numeric
+                        if [[ -z "$input_string" ]]; then
+                            echo "Error: No input provided. Please enter a string." >&2
+                            exit 1
+                        fi
+
+                        if [[ "$input_string" =~ ^[0-9]+$ ]]; then
+                            echo "Error: Numeric input detected. Please enter a string." >&2
+                            exit 1
+                        fi
+
+                        # Function to check if a string is a palindrome
+                        is_palindrome() {
+                            local input="$1"
+                            local reversed_input=$(echo "$input" | rev)
+                            if [[ "$input" == "$reversed_input" ]]; then
+                                echo "The string '$input' is a palindrome."
+                            else
+                                echo "The string '$input' is not a palindrome."
+                            fi
+                        }
+
+                        # Check if the string is a palindrome
+                        is_palindrome "$input_string"
+                    """, returnStdout: true).trim()
+                    
+                    def errorMessage = ""
+                    if (output.contains("Error:")) {
+                        errorMessage = output
+                        output = "Invalid input. Please enter a non-numeric string."
+                    }
+
                     echo output // This line outputs the result to the Jenkins console
 
                     // Write the HTML file content
-                    writeFile file: OUTPUT_FILE, text: """
+                    def htmlContent = """
                         <!DOCTYPE html>
                         <html lang='en'>
                         <head>
@@ -37,6 +73,24 @@ pipeline {
                         </body>
                         </html>
                     """
+                    if (errorMessage) {
+                        htmlContent = """
+                            <!DOCTYPE html>
+                            <html lang='en'>
+                            <head>
+                                <meta charset='UTF-8'>
+                                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                                <title>Palindrome Check Error</title>
+                            </head>
+                            <body>
+                                <h1>Error</h1>
+                                <p>${errorMessage}</p>
+                            </body>
+                            </html>
+                        """
+                    }
+
+                    writeFile file: OUTPUT_FILE, text: htmlContent
                 }
             }
         }
