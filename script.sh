@@ -51,3 +51,4 @@ html_content="
 output_file="palindrome_result.html"
 echo "$html_content" > "$output_file"
 
+
